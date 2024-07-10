@@ -8,13 +8,12 @@ void UART::begin(void) {
 }
 
 void UART::update(State* state) {
-    uart.send_debug_info_msg(state);
-    // uart.send_state_as_json(&state);
+    // uart.send_debug_info_msg(state);
+    send_state_as_json(state);
 
     this->listen();
     if (this->new_package_received) {
         this->enumerate_commands_from_json(this->received_string, state);
-        this->send_relevant_state_info(state);
         this->new_package_received = false;
     }
 }
@@ -27,17 +26,17 @@ void UART::listen(void) {
     char rc;
 
     if (Serial.available() > 0) {
-        while ((Serial.available() > 0) && (uart.new_package_received == false)) {
+        while ((Serial.available() > 0) && (this->new_package_received == false)) {
             rc = Serial.read();
 
             if (rc != end_marker) {
-                uart.received_string[index] = rc;
+                this->received_string[index] = rc;
                 index++;
             }
             else {
-                uart.received_string[index] = '\0';
+                this->received_string[index] = '\0';
                 index = 0;
-                uart.new_package_received = true;
+                this->new_package_received = true;
             }
         }
     }
@@ -53,9 +52,6 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
      float::m = middle motor voltage between 0 and 1
      float::l = left motor voltage between 0 and 1
      float::r = right motor voltage between 0 and 1
-     bool::rm = reverse middle
-     bool::rl = reverse left
-     bool::rr = reverse right
      bool::e = enable true=1 or false=0
      */
 
@@ -70,58 +66,34 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
     }
 
     if(doc["m"] != NULL) {
-        state->middle_motor.percentage = doc["m"];
+        state->middle_motor.percentage = abs((float)doc["m"]);
+        state->middle_motor.reverse = (float)doc["m"] < 0.0;
     }
     if(doc["l"] != NULL) {
-        state->left_motor.percentage = doc["l"];
+        state->left_motor.percentage = abs((float)doc["l"]);
+        state->left_motor.reverse = (float)doc["l"] < 0.0;
     }
     if(doc["r"] != NULL) {
-        state->right_motor.percentage = doc["r"];
+        state->right_motor.percentage = abs((float)doc["r"]);
+        state->right_motor.reverse = (float)doc["r"] < 0.0;
     }
     if(doc["e"] != NULL) {
-        state->enable = doc["e"];
-    }
-    if(doc["rm"] != NULL) {
-        state->middle_motor.reverse = doc["rm"];
-    }
-    if(doc["rl"] != NULL) {
-        state->left_motor.reverse = doc["rl"];
-    }
-    if(doc["rr"] != NULL) {
-        state->right_motor.reverse = doc["rr"];
+        state->enable = (bool)doc["e"];
     }
 }
 
 void UART::send_state_as_json(State* state) {
-    /* Send system data over Serial UART in json format */
-
-    // allocate json buffer space
-    StaticJsonDocument<128> doc;
-
-    // fill json buffer with data
-    doc["id"] = "Micro";
-
-    JsonArray position = doc.createNestedArray("position");
-    position.add(state->kite.position.x);
-    position.add(state->kite.position.y);
-    position.add(state->kite.position.z);
-
-
-    // send the prepared json string over Serial uart
-    serializeJson(doc, Serial);
-    Serial.println();
-}
-
-void UART::send_relevant_state_info(State* state) {
     /* For testing */
 
     StaticJsonDocument<128> doc;
     doc["e"] = state->enable;
+    doc["sm"] = state->middle_motor.step;
+    doc["m"] = state->middle_motor.percentage;
+    doc["rm"] = state->middle_motor.reverse;
 
     // send the prepared json string over Serial uart
     serializeJson(doc, Serial);
     Serial.println();
-
 }
 
 void UART::send_debug_info_msg(State* state) {

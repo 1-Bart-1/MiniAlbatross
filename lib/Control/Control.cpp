@@ -12,13 +12,48 @@ void Control::begin(State* state) {
     ledcAttachPin(MIDDLE_MOTOR_PIN, 0);
     ledcAttachPin(LEFT_MOTOR_PIN, 1);
     ledcAttachPin(RIGHT_MOTOR_PIN, 2);
+
+    pinMode(MIDDLE_MOTOR_HALL_PIN1, INPUT_PULLDOWN);
+    pinMode(MIDDLE_MOTOR_HALL_PIN2, INPUT_PULLDOWN);
+    pinMode(MIDDLE_MOTOR_HALL_PIN3, INPUT_PULLDOWN);
+    attachInterrupt(MIDDLE_MOTOR_HALL_PIN1, middle_motor_hall_interrupt_1, RISING);
+    attachInterrupt(MIDDLE_MOTOR_HALL_PIN2, middle_motor_hall_interrupt_2, RISING);
+    attachInterrupt(MIDDLE_MOTOR_HALL_PIN3, middle_motor_hall_interrupt_3, RISING);
 }
 
 
 void Control::update(State* state){
-    ledcWrite(MIDDLE_MOTOR_PIN, (int)state->left_motor.percentage*MAX_DUTY_CYCLE);
-    ledcWrite(LEFT_MOTOR_PIN, (int)state->left_motor.percentage*MAX_DUTY_CYCLE);
-    ledcWrite(RIGHT_MOTOR_PIN, (int)state->left_motor.percentage*MAX_DUTY_CYCLE);
+    ledcWrite(0, (int)(state->middle_motor.percentage*MAX_DUTY_CYCLE));
+    ledcWrite(1, (int)(state->left_motor.percentage*MAX_DUTY_CYCLE));
+    ledcWrite(2, (int)(state->right_motor.percentage*MAX_DUTY_CYCLE));
+    state->middle_motor.step = middle_motor_step;
 }
 
 Control control;
+
+void IRAM_ATTR middle_motor_hall_interrupt_1() {
+    if (control.last_hall_sensor == 2) {
+        control.middle_motor_step--;
+    } else if (control.last_hall_sensor == 3) {
+        control.middle_motor_step++;
+    }
+    if (control.last_hall_sensor != 1){
+        control.last_hall_sensor = 1;
+    }
+}
+void IRAM_ATTR middle_motor_hall_interrupt_2() {
+    if (control.last_hall_sensor == 1) {
+        control.middle_motor_step++;
+    } else if (control.last_hall_sensor == 3) {
+        control.middle_motor_step--;
+    }
+    control.last_hall_sensor = 2;
+}
+void IRAM_ATTR middle_motor_hall_interrupt_3() {
+    if (control.last_hall_sensor == 1) {
+        control.middle_motor_step--;
+    } else if (control.last_hall_sensor == 2) {
+        control.middle_motor_step++;
+    }
+    control.last_hall_sensor = 3;
+}

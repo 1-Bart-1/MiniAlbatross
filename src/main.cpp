@@ -19,6 +19,7 @@ void setup() {
 void loop() {
     state.update();
     control.update(&state);
+    Serial.println("main loop...");
     uart.update(&state);
 
     // delay(10);

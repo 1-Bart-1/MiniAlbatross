@@ -20,6 +20,7 @@ class Kite{ // TODO: should be struct
 
 struct Motor{
     float percentage = 0.0; // percentage of the max input voltage
+    int step = 0; // number of coil steps. TODO: how many steps is one rotation? and what is the diameter?
     float rotation = 0.0; // total rotation
     float speed = 0.0; // rotational velocity
     bool reverse = false;
