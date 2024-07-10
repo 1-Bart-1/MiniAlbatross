@@ -21,6 +21,6 @@ void loop() {
     control.update();
     uart.update();
 
-    delay(10);
+    // delay(10);
 }
 

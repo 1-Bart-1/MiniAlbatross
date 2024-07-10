@@ -1,5 +1,5 @@
 #include "UART.h"
-#include "Control.h"
+
 
 UART::UART() {
 }
@@ -48,13 +48,15 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
      * on the basis of the received data.
      * 
      * json example message:
-     {"Kp":100}
-     {"Kp":0,"Ki":0,"Kd":0, "enable":true}
-     {"Kp":1,"Ki":0,"Kd":0, "enable":true}
-     {"Kp":2,"Ki":0,"Kd":0, "enable":true}
-     {"Kp":3,"Ki":0,"Kd":0, "enable":true}
-     {"Kp":4,"Ki":0,"Kd":0, "enable":true}
-     {"Kp":5,"Ki":0,"Kd":0, "enable":true}
+     {"m":1.0}
+     {"m":0, "l":0, "r":0, "rm":0, "e":1 }
+     float::m = middle motor voltage between 0 and 1
+     float::l = left motor voltage between 0 and 1
+     float::r = right motor voltage between 0 and 1
+     bool::rm = reverse middle
+     bool::rl = reverse left
+     bool::rr = reverse right
+     bool::e = enable true=1 or false=0
      */
 
     StaticJsonDocument<100> doc;
@@ -64,55 +66,29 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
     if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
-        switch(string[0]){
-            case 'q':
-                state->pid_params.Kp += 1;
-                break;
-            case 'a':  
-                state->pid_params.Kp -= 1;
-                break;
-            case 'w':
-                state->pid_params.Ki += 0.1;
-                break;
-            case 's':
-                state->pid_params.Ki -= 0.1;
-                break;
-            case 'e':
-                state->pid_params.Kd += 0.1;
-                break;
-            case 'd':  
-                state->pid_params.Kd -= 0.1;
-                break;
-            case 'o': // move out
-                state->motor.constant_speed = (state->motor.constant_speed != 100) ? 100 : 0;
-                break;
-            case 'i': // move in
-                state->motor.constant_speed = (state->motor.constant_speed != -100) ? -100 : 0;
-                break;
-            case 'm':
-                state->motor.enable = !state->motor.enable;
-                break;
-        }
         return;
     }
 
-    if(doc["Kp"] != NULL) {
-        state->pid_params.Kp = doc["Kp"];
+    if(doc["m"] != NULL) {
+        state->middle_motor.percentage = doc["m"];
     }
-    if(doc["Ki"] != NULL) {
-        state->pid_params.Ki = doc["Ki"];
+    if(doc["l"] != NULL) {
+        state->left_motor.percentage = doc["l"];
     }
-    if(doc["Kd"] != NULL) {
-        state->pid_params.Kd = doc["Kd"];
+    if(doc["r"] != NULL) {
+        state->right_motor.percentage = doc["r"];
     }
-    if(doc["enable"] != NULL) {
-        state->motor.enable = doc["enable"];
+    if(doc["e"] != NULL) {
+        state->enable = doc["e"];
     }
-    if(doc["constant_speed"] != NULL) {
-        state->motor.constant_speed = doc["constant_speed"];
+    if(doc["rm"] != NULL) {
+        state->middle_motor.reverse = doc["rm"];
     }
-    if(doc["constant_speed"] != NULL) {
-        state->motor.constant_speed = doc["constant_speed"];
+    if(doc["rl"] != NULL) {
+        state->left_motor.reverse = doc["rl"];
+    }
+    if(doc["rr"] != NULL) {
+        state->right_motor.reverse = doc["rr"];
     }
 }
 
@@ -123,7 +99,7 @@ void UART::send_state_as_json(State* state) {
     StaticJsonDocument<128> doc;
 
     // fill json buffer with data
-    doc["id"] = "Boat";
+    doc["id"] = "Micro";
 
     JsonArray position = doc.createNestedArray("position");
     position.add(state->kite.position.x);
@@ -136,14 +112,11 @@ void UART::send_state_as_json(State* state) {
     Serial.println();
 }
 
-void UART::send_pid_params(State* state) {
+void UART::send_relevant_state_info(State* state) {
     /* For testing */
 
     StaticJsonDocument<128> doc;
-    doc["Kp"] = state->pid_params.Kp;
-    doc["Ki"] = state->pid_params.Ki;
-    doc["Kd"] = state->pid_params.Kd;
-    doc["enable"] = state->motor.enable;
+    doc["e"] = state->enable;
 
     // send the prepared json string over Serial uart
     serializeJson(doc, Serial);
@@ -152,24 +125,12 @@ void UART::send_pid_params(State* state) {
 }
 
 void UART::send_debug_info_msg(State* state) {
-    Serial.print("speed\t");
-    Serial.print(state->motor.left_speed);
+    Serial.print("motor\t");
+    Serial.print(state->middle_motor.speed);
     Serial.print("\t");
-    Serial.print(state->kite.setpoint);
+    Serial.print(state->middle_motor.percentage);
     Serial.print("\t");
-    Serial.print(state->kite.angle);
-    Serial.print("\t\t");
-
-    Serial.print("pid\t");
-    Serial.print(state->pid_params.Kp);
-    Serial.print("\t");
-    Serial.print(state->pid_params.Ki);
-    Serial.print("\t");
-    Serial.print(state->pid_params.Kd);
-    Serial.print("\t\t");
-
-    Serial.print("angle\t");
-    Serial.print(state->kite.angle);
+    Serial.print(state->middle_motor.reverse);
     Serial.print("\t\t");
 
     Serial.println();

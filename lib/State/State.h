@@ -20,28 +20,20 @@ class Kite{
 
 class Motor{
     public:
-        float pid_speed;
-        float left_speed;
-        float right_speed;
-        
-        bool enable = true;
-        float constant_speed = 0;
-
-        void update();
-    private:
-        void update_actual_speed();
+        float percentage = 0.0; // percentage of the max input voltage
+        float rotation = 0.0; // total rotation
+        float speed = 0.0; // rotational velocity
+        bool reverse = false;
 };
 
 class State{
     public:
         Kite kite;
-        Motor motor;
+        Motor middle_motor;
+        Motor left_motor;
+        Motor right_motor;
+        bool enable = false;
 
-        struct PID_params {
-            double Kp=10;
-            double Ki=0;
-            double Kd=0;
-        } pid_params;
         void update();
 };
 

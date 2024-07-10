@@ -3,9 +3,14 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-
+#include "Control.h"
 #include "State.h"
 
+
+/*
+Receive 3 motor speeds from rpi.
+Add them to the state.
+*/
 class UART
 {
 public:
@@ -18,10 +23,9 @@ public:
     
 private:
     void listen(void);
-
     void send_state_as_json(State* state);
     void send_debug_info_msg(State* state);
-    void send_pid_params(State* state);
+    void send_relevant_state_info(State* state);
     void enumerate_commands_from_json(char* string, State* state);
 };
 
