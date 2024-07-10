@@ -1,18 +1,26 @@
-#include <Arduino.h>
+#include <MPU6050_6Axis_MotionApps20.h>
+#include <Adafruit_I2CDevice.h>
+#include <SPI.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "Connect.h"
+#include "Control.h"
+#include "State.h"
+#include "UART.h"
+
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+    Serial.begin(115200);
+    connect.begin(&state);
+    control.begin(&state);
+    uart.begin();
 }
+
 
 void loop() {
-  // put your main code here, to run repeatedly:
+    state.update();
+    control.update();
+    uart.update();
+
+    delay(10);
 }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
