@@ -18,8 +18,8 @@ void setup() {
 
 void loop() {
     state.update();
-    control.update();
-    uart.update();
+    control.update(&state);
+    uart.update(&state);
 
     // delay(10);
 }

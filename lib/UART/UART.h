@@ -19,7 +19,7 @@ public:
     char received_string[100];
 
     void begin(void);
-    void update(void);
+    void update(State* state);
     
 private:
     void listen(void);

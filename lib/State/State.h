@@ -4,7 +4,7 @@
 #include <helper_3dmath.h>
 #include <math.h>
 
-class Kite{
+class Kite{ // TODO: should be struct
     public:
         VectorFloat position;
         float angle; //using axis-angle representation
@@ -18,12 +18,11 @@ class Kite{
         void updatePosition();
 };
 
-class Motor{
-    public:
-        float percentage = 0.0; // percentage of the max input voltage
-        float rotation = 0.0; // total rotation
-        float speed = 0.0; // rotational velocity
-        bool reverse = false;
+struct Motor{
+    float percentage = 0.0; // percentage of the max input voltage
+    float rotation = 0.0; // total rotation
+    float speed = 0.0; // rotational velocity
+    bool reverse = false;
 };
 
 class State{

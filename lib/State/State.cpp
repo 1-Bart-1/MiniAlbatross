@@ -28,22 +28,9 @@ void Kite::update(){
     this->updateAngle();
 }
 
-void Motor::update(){
-    this->update_actual_speed();
-}
-
-void Motor::update_actual_speed(){
-    this->left_speed = 0;
-    this->right_speed = 0;
-    if (this->enable) {
-        this->left_speed = this->pid_speed + this->constant_speed;
-        this->right_speed = -this->pid_speed + this->constant_speed;
-    }
-}
 
 void State::update(){
     this->kite.update();
-    this->motor.update();
 }
 
 State state;

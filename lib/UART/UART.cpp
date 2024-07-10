@@ -7,14 +7,14 @@ UART::UART() {
 void UART::begin(void) {
 }
 
-void UART::update(void) {
-    uart.send_debug_info_msg(&state);
+void UART::update(State* state) {
+    uart.send_debug_info_msg(state);
     // uart.send_state_as_json(&state);
 
     this->listen();
     if (this->new_package_received) {
-        this->enumerate_commands_from_json(this->received_string, &state);
-        this->send_pid_params(&state);
+        this->enumerate_commands_from_json(this->received_string, state);
+        this->send_relevant_state_info(state);
         this->new_package_received = false;
     }
 }
