@@ -13,6 +13,10 @@ void Control::begin(State* state) {
     ledcAttachPin(LEFT_MOTOR_PIN, 1);
     ledcAttachPin(RIGHT_MOTOR_PIN, 2);
 
+    pinMode(MIDDLE_MOTOR_REVERSE_PIN, OUTPUT);
+    pinMode(LEFT_MOTOR_REVERSE_PIN, OUTPUT);
+    pinMode(RIGHT_MOTOR_REVERSE_PIN, OUTPUT);
+
     pinMode(MIDDLE_MOTOR_HALL_PIN1, INPUT_PULLDOWN);
     pinMode(MIDDLE_MOTOR_HALL_PIN2, INPUT_PULLDOWN);
     pinMode(MIDDLE_MOTOR_HALL_PIN3, INPUT_PULLDOWN);
@@ -26,6 +30,14 @@ void Control::update(State* state){
     ledcWrite(0, (int)(state->middle_motor.percentage*MAX_DUTY_CYCLE));
     ledcWrite(1, (int)(state->left_motor.percentage*MAX_DUTY_CYCLE));
     ledcWrite(2, (int)(state->right_motor.percentage*MAX_DUTY_CYCLE));
+    
+    if (state->middle_motor.reverse) digitalWrite(MIDDLE_MOTOR_REVERSE_PIN, HIGH);
+    else digitalWrite(MIDDLE_MOTOR_REVERSE_PIN, LOW);
+    if (state->left_motor.reverse) digitalWrite(LEFT_MOTOR_REVERSE_PIN, HIGH);
+    else digitalWrite(LEFT_MOTOR_REVERSE_PIN, LOW);
+    if (state->left_motor.reverse) digitalWrite(LEFT_MOTOR_REVERSE_PIN, HIGH);
+    else digitalWrite(LEFT_MOTOR_REVERSE_PIN, LOW);
+    
     state->middle_motor.step = middle_motor_step;
 }
 

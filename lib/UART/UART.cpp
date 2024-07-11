@@ -9,12 +9,14 @@ void UART::begin(void) {
 
 void UART::update(State* state) {
     // uart.send_debug_info_msg(state);
-    send_state_as_json(state);
+    // send_state_as_json(state);
 
     this->listen();
     if (this->new_package_received) {
+        // Serial.println(this->received_string);
         this->enumerate_commands_from_json(this->received_string, state);
         this->new_package_received = false;
+        this->send_state_as_json(state);
     }
 }
 
