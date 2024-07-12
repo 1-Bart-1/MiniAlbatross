@@ -20,9 +20,11 @@ class Kite{ // TODO: should be struct
 
 struct Motor{
     float percentage = 0.0; // percentage of the max input voltage
+    float filtered_percentage = 0.0;
     int step = 0; // number of coil steps. TODO: how many steps is one rotation? and what is the diameter?
     float rotation = 0.0; // total rotation
     float speed = 0.0; // rotational velocity
+    float current = 0.0;
     bool reverse = false;
 };
 
@@ -32,6 +34,8 @@ class State{
         Motor middle_motor;
         Motor left_motor;
         Motor right_motor;
+        float voltage;
+        unsigned long start_time = millis();
         bool enable = false;
 
         void update();

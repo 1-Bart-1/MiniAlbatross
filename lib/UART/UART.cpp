@@ -68,6 +68,7 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
     }
 
     if(doc["m"] != NULL) {
+        state->middle_motor.filtered_percentage = state->middle_motor.filtered_percentage*0.9 + abs((float)doc["m"])*0.1;
         state->middle_motor.percentage = abs((float)doc["m"]);
         state->middle_motor.reverse = (float)doc["m"] < 0.0;
     }
@@ -90,8 +91,11 @@ void UART::send_state_as_json(State* state) {
     StaticJsonDocument<128> doc;
     doc["e"] = state->enable;
     doc["sm"] = state->middle_motor.step;
-    doc["m"] = state->middle_motor.percentage;
-    doc["rm"] = state->middle_motor.reverse;
+    // doc["m"] = state->middle_motor.percentage;
+    // doc["rm"] = state->middle_motor.reverse;
+    doc["Im"] = state->middle_motor.current;
+    doc["V"] = state->voltage;
+    doc["t"] = millis() - state->start_time;
 
     // send the prepared json string over Serial uart
     serializeJson(doc, Serial);

@@ -11,8 +11,8 @@
 void setup() {
     Serial.begin(115200);
     connect.begin(&state);
-    control.begin(&state);
     uart.begin();
+    control.begin(&state);
 }
 
 
