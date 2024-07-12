@@ -50,9 +50,11 @@ void Control::update(State* state){
         middle_current_offset += analogRead(MIDDLE_MOTOR_CURRENT_PIN)*0.001;
         this->i++;
     }
-    state->middle_motor.current = (analogRead(MIDDLE_MOTOR_CURRENT_PIN) - middle_current_offset) / 4095.0 * 30.0;
+    state->middle_motor.current = (analogRead(MIDDLE_MOTOR_CURRENT_PIN) - middle_current_offset) * 0.0185348;
     Serial.print("mid cur\t");
     Serial.println(state->middle_motor.current);
+    // Serial.println(analogRead(MIDDLE_MOTOR_CURRENT_PIN));
+    
     state->left_motor.current = analogRead(LEFT_MOTOR_CURRENT_PIN);
     state->right_motor.current = analogRead(RIGHT_MOTOR_CURRENT_PIN);
     
