@@ -46,17 +46,35 @@ void Control::update(State* state){
 
     state->voltage = analogRead(VOLTAGE_PIN);
 
-    if (this->i < 1000) {
-        middle_current_offset += analogRead(MIDDLE_MOTOR_CURRENT_PIN)*0.001;
-        this->i++;
-    }
-    state->middle_motor.current = (analogRead(MIDDLE_MOTOR_CURRENT_PIN) - middle_current_offset) * 0.0185348;
-    Serial.print("mid cur\t");
-    Serial.println(state->middle_motor.current);
-    // Serial.println(analogRead(MIDDLE_MOTOR_CURRENT_PIN));
+    // if (this->i < 1000) {
+    //     right_current_offset += analogRead(RIGHT_MOTOR_CURRENT_PIN)*0.001;
+    //     this->i++;
+    // }
     
-    state->left_motor.current = analogRead(LEFT_MOTOR_CURRENT_PIN);
-    state->right_motor.current = analogRead(RIGHT_MOTOR_CURRENT_PIN);
+    state->middle_motor.current = (analogRead(MIDDLE_MOTOR_CURRENT_PIN) - 1832.5) * 0.01901175471312378;
+    state->left_motor.current = (analogRead(LEFT_MOTOR_CURRENT_PIN) - 1834.5) * 0.018141429100333208;
+    state->right_motor.current = (analogRead(RIGHT_MOTOR_CURRENT_PIN) - 1808.3) * 0.018605814403539776;
+    // Serial.println(state->right_motor.current);
+    // Serial.println(state->middle_motor.current);
+
+    /*
+    multiplier: -4/(min-mid)/2 + 4/(max-mid)/2
+    offset: mid
+    middle motor
+    offset -4A: 1621.2
+    offset 0A: 1832.5
+    offset 4A: 2042.15
+
+    left motor
+    offset -4A: 1615.5
+    offset 0A: 1834.5
+    offset 4A: 2056.5
+
+    right motor
+    offset -4A: 1595.0
+    offset 0A: 1808.3
+    offset 4A: 2025.0
+    */
     
     state->middle_motor.step = middle_motor_step;
     state->right_motor.step = right_motor_step;

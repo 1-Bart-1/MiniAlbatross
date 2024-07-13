@@ -52,7 +52,10 @@ class Control {
         int left_motor_step = 0;
         int right_motor_step = 0;
     private:
-        float middle_current_offset = 0.0;
+        float middle_current_offset = 1832.5;
+        float left_current_offset = 0.0;
+        float right_current_offset = 0.0;
+        float sensor_reading = 0.0;
         int i = 0;
 };
 
