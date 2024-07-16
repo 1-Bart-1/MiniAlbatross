@@ -9,6 +9,7 @@
 const uint8_t motor_pins[] = {15, 2, 4};
 const uint8_t reverse_pins[] = {5, 18, 19};
 const uint8_t current_pins[] = {35, 33, 32};
+const uint8_t pwm_channels[] = {3, 1, 0};
 
 #define MIDDLE_MOTOR_HALL_PIN1 13
 #define MIDDLE_MOTOR_HALL_PIN2 12

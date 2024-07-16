@@ -7,10 +7,16 @@ Control::Control() {
 
 void Control::begin(State* state) {
     // pinMode(VOLTAGE_PIN, INPUT);
-
-    for(int i=0; i<2; i++) {
-        ledcSetup(i, PWM_FREQ, PWM_RESOLUTION);
-        ledcAttachPin(motor_pins[i], i);
+    
+    for(int i=0; i<=2; i++) {
+        Serial.println(i);
+        ledcSetup(pwm_channels[i], PWM_FREQ, PWM_RESOLUTION);
+    }
+    for(int i=0; i<=2; i++) {
+        ledcAttachPin(motor_pins[i], pwm_channels[i]);
+    }
+    
+    for(int i=0; i<=2; i++) {
         pinMode(reverse_pins[i], OUTPUT);
         pinMode(current_pins[i], INPUT);
     }
@@ -40,7 +46,7 @@ void Control::update(State* state){
     if (i<2) i++;
     else i=0;
 
-    ledcWrite(i, (int)(state->motors[i].percentage*MAX_DUTY_CYCLE));
+    ledcWrite(pwm_channels[i], (int)(state->motors[i].percentage*MAX_DUTY_CYCLE));
 
     measure = analogRead(current_pins[i]);
     if (state->enable) {
