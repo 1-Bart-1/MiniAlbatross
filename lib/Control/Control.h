@@ -6,17 +6,9 @@
 
 #define VOLTAGE_PIN 34
 
-#define MIDDLE_MOTOR_PIN 15
-#define LEFT_MOTOR_PIN 2
-#define RIGHT_MOTOR_PIN 4
-
-#define MIDDLE_MOTOR_REVERSE_PIN 5
-#define LEFT_MOTOR_REVERSE_PIN 18
-#define RIGHT_MOTOR_REVERSE_PIN 19
-
-#define MIDDLE_MOTOR_CURRENT_PIN 33
-#define LEFT_MOTOR_CURRENT_PIN 32
-#define RIGHT_MOTOR_CURRENT_PIN 35
+const uint8_t motor_pins[] = {15, 2, 4};
+const uint8_t reverse_pins[] = {5, 18, 19};
+const uint8_t current_pins[] = {35, 33, 32};
 
 #define MIDDLE_MOTOR_HALL_PIN1 13
 #define MIDDLE_MOTOR_HALL_PIN2 12
@@ -52,11 +44,14 @@ class Control {
         int left_motor_step = 0;
         int right_motor_step = 0;
     private:
-        float middle_current_offset = 1832.5;
-        float left_current_offset = 0.0;
-        float right_current_offset = 0.0;
-        float sensor_reading = 0.0;
-        int i = 0;
+        float current = 0.0;
+        float measure = 0.0;
+        std::array<float, 3> current_offsets{2008, 2008, 2008};
+        std::array<unsigned long, 3> current_loop_times{micros(), micros(), micros()};
+        std::array<unsigned long, 3> last_loop_times{micros(), micros(), micros()};
+        
+        // float sensor_reading = 0.0;
+        uint8_t i = 0;
 };
 
 extern Control control;
@@ -64,5 +59,11 @@ extern Control control;
 void middle_motor_hall_interrupt_1();
 void middle_motor_hall_interrupt_2();
 void middle_motor_hall_interrupt_3();
+void left_motor_hall_interrupt_1();
+void left_motor_hall_interrupt_2();
+void left_motor_hall_interrupt_3();
+void right_motor_hall_interrupt_1();
+void right_motor_hall_interrupt_2();
+void right_motor_hall_interrupt_3();
 
 #endif

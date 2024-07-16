@@ -31,13 +31,13 @@ struct Motor{
 class State{
     public:
         Kite kite;
-        Motor middle_motor;
-        Motor left_motor;
-        Motor right_motor;
+        std::array<Motor, 3> motors{Motor(), Motor(), Motor()}; // middle, left, right motor
+
         float voltage;
         unsigned long start_time = millis();
+        unsigned long last_receive_time = micros();
         bool enable = false;
-
+        
         void update();
 };
 

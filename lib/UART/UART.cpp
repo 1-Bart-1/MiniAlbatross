@@ -17,6 +17,7 @@ void UART::update(State* state) {
         this->enumerate_commands_from_json(this->received_string, state);
         this->new_package_received = false;
         this->send_state_as_json(state);
+        state->last_receive_time = micros();
     }
 }
 
@@ -39,6 +40,7 @@ void UART::listen(void) {
                 this->received_string[index] = '\0';
                 index = 0;
                 this->new_package_received = true;
+                Serial.flush();
             }
         }
     }
@@ -57,7 +59,7 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
      bool::e = enable true=1 or false=0
      */
 
-    StaticJsonDocument<100> doc;
+    StaticJsonDocument<256> doc;
 
     DeserializationError error = deserializeJson(doc, string);
 
@@ -65,37 +67,46 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
         return;
-    }
+    } 
 
-    if(doc["m"] != NULL) {
-        state->middle_motor.filtered_percentage = state->middle_motor.filtered_percentage*0.9 + abs((float)doc["m"])*0.1;
-        state->middle_motor.percentage = abs((float)doc["m"]);
-        state->middle_motor.reverse = (float)doc["m"] < 0.0;
+    if(doc.containsKey("m")) {
+        state->motors[0].percentage = abs((float)doc["m"]);
+        state->motors[0].reverse = (float)doc["m"] < 0.0;
     }
-    if(doc["l"] != NULL) {
-        state->left_motor.percentage = abs((float)doc["l"]);
-        state->left_motor.reverse = (float)doc["l"] < 0.0;
+    if(doc.containsKey("l")) {
+        state->motors[1].percentage = abs((float)doc["l"]);
+        state->motors[1].reverse = (float)doc["l"] < 0.0;
     }
-    if(doc["r"] != NULL) {
-        state->right_motor.percentage = abs((float)doc["r"]);
-        state->right_motor.reverse = (float)doc["r"] < 0.0;
+    if(doc.containsKey("r")) {
+        state->motors[2].percentage = abs((float)doc["r"]);
+        state->motors[2].reverse = (float)doc["r"] < 0.0;
     }
-    if(doc["e"] != NULL) {
+    if(doc.containsKey("e")) {
         state->enable = (bool)doc["e"];
-    }
+    } 
 }
 
 void UART::send_state_as_json(State* state) {
     /* For testing */
 
-    StaticJsonDocument<128> doc;
-    doc["e"] = state->enable;
-    doc["sm"] = state->middle_motor.step;
-    // doc["m"] = state->middle_motor.percentage;
-    // doc["rm"] = state->middle_motor.reverse;
-    doc["Im"] = state->middle_motor.current;
-    doc["V"] = state->voltage;
-    doc["t"] = millis() - state->start_time;
+    StaticJsonDocument<256> doc;
+    // doc["e"] = state->enable;
+    doc["m"] = state->motors[0].percentage;
+    doc["l"] = state->motors[1].percentage;
+    doc["r"] = state->motors[2].percentage;
+
+    // doc["sm"] = state->motors[0].step;
+    // doc["sl"] = state->motors[1].step;
+    // doc["sr"] = state->motors[2].step;
+
+    doc["Im"] = state->motors[0].current;
+    doc["Il"] = state->motors[1].current;
+    doc["Ir"] = state->motors[2].current;
+
+    // doc["om"] = 
+
+    // doc["V"] = state->voltage;
+    // doc["t"] = millis() - state->start_time;
 
     // send the prepared json string over Serial uart
     serializeJson(doc, Serial);
@@ -104,11 +115,11 @@ void UART::send_state_as_json(State* state) {
 
 void UART::send_debug_info_msg(State* state) {
     Serial.print("motor\t");
-    Serial.print(state->middle_motor.speed);
+    Serial.print(state->motors[0].speed);
     Serial.print("\t");
-    Serial.print(state->middle_motor.percentage);
+    Serial.print(state->motors[0].percentage);
     Serial.print("\t");
-    Serial.print(state->middle_motor.reverse);
+    Serial.print(state->motors[0].reverse);
     Serial.print("\t\t");
 
     Serial.println();

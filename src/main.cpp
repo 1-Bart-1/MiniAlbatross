@@ -17,6 +17,7 @@ void setup() {
 
 
 void loop() {
+    // Serial.println("hello");
     state.update();
     control.update(&state);
     uart.update(&state);
