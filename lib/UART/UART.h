@@ -6,6 +6,7 @@
 #include "Control.h"
 #include "State.h"
 
+#define BUFFER_SIZE 512
 
 /*
 Receive 3 motor speeds from rpi.
@@ -27,6 +28,7 @@ private:
     void send_debug_info_msg(State* state);
     void send_relevant_state_info(State* state);
     void enumerate_commands_from_json(char* string, State* state);
+
 };
 
 extern UART uart;

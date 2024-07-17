@@ -2,6 +2,9 @@
 
 
 UART::UART() {
+    Serial.setRxBufferSize(BUFFER_SIZE);
+    Serial.setTxBufferSize(BUFFER_SIZE);
+    Serial.begin(115200);
 }
 
 void UART::begin(void) {
@@ -27,7 +30,6 @@ void UART::listen(void) {
     static uint8_t index = 0;
     char end_marker = '\n';
     char rc;
-
     if (Serial.available() > 0) {
         while ((Serial.available() > 0) && (this->new_package_received == false)) {
             rc = Serial.read();
@@ -40,7 +42,7 @@ void UART::listen(void) {
                 this->received_string[index] = '\0';
                 index = 0;
                 this->new_package_received = true;
-                Serial.flush();
+                // Serial.flush();
             }
         }
     }
@@ -59,7 +61,7 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
      bool::e = enable true=1 or false=0
      */
 
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<BUFFER_SIZE> doc;
 
     DeserializationError error = deserializeJson(doc, string);
 
@@ -68,28 +70,50 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
         Serial.println(error.f_str());
         return;
     } 
-
-    if(doc.containsKey("m")) {
-        state->motors[0].percentage = abs((float)doc["m"]);
-        state->motors[0].reverse = (float)doc["m"] < 0.0;
+    else {
+        if(doc.containsKey("md")) {
+            state->mode = (bool)doc["md"];
+        }
+        if(doc.containsKey("m")) {
+            if(state->mode == 0) {
+                state->motors[0].percentage = (float)doc["m"];
+            } else {
+                state->motors[0].set_speed = (float)doc["m"];
+            }
+        }
+        if(doc.containsKey("l")) {
+            if(state->mode == 0) {
+                state->motors[1].percentage = (float)doc["l"];
+            } else {
+                state->motors[1].set_speed = (float)doc["l"];
+            }
+        }
+        if(doc.containsKey("r")) {
+            if(state->mode == 0) {
+                state->motors[2].percentage = (float)doc["r"];
+            } else {
+                state->motors[2].set_speed = (float)doc["r"];
+            }
+        }
+        if(doc.containsKey("Kp")) {
+            state->Kp = (bool)doc["Kp"];
+        }
+        if(doc.containsKey("Ki")) {
+            state->Ki = (bool)doc["Ki"];
+        }
+        if(doc.containsKey("Kd")) {
+            state->Kd = (bool)doc["Kd"];
+        }
+        if(doc.containsKey("e")) {
+            state->enable = (bool)doc["e"];
+        } 
     }
-    if(doc.containsKey("l")) {
-        state->motors[1].percentage = abs((float)doc["l"]);
-        state->motors[1].reverse = (float)doc["l"] < 0.0;
-    }
-    if(doc.containsKey("r")) {
-        state->motors[2].percentage = abs((float)doc["r"]);
-        state->motors[2].reverse = (float)doc["r"] < 0.0;
-    }
-    if(doc.containsKey("e")) {
-        state->enable = (bool)doc["e"];
-    } 
 }
 
 void UART::send_state_as_json(State* state) {
     /* For testing */
 
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<BUFFER_SIZE> doc;
     // doc["e"] = state->enable;
     doc["m"] = state->motors[0].percentage;
     doc["l"] = state->motors[1].percentage;
@@ -99,9 +123,21 @@ void UART::send_state_as_json(State* state) {
     // doc["sl"] = state->motors[1].step;
     // doc["sr"] = state->motors[2].step;
 
-    doc["Im"] = state->motors[0].current;
-    doc["Il"] = state->motors[1].current;
-    doc["Ir"] = state->motors[2].current;
+    // doc["Im"] = state->motors[0].current;
+    // doc["Il"] = state->motors[1].current;
+    // doc["Ir"] = state->motors[2].current;
+
+    doc["sm"] = state->motors[0].step;
+    doc["sl"] = state->motors[1].step;
+    doc["sr"] = state->motors[2].step;
+
+    doc["vm"] = state->motors[0].speed;
+    doc["vl"] = state->motors[1].speed;
+    doc["vr"] = state->motors[2].speed;
+
+    doc["vsm"] = state->motors[0].set_speed;
+    doc["vsl"] = state->motors[1].set_speed;
+    doc["vsr"] = state->motors[2].set_speed;
 
     // doc["om"] = 
 

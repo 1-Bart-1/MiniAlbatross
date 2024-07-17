@@ -2,14 +2,16 @@
 #define Control_h
 
 #include <Arduino.h>
+#include <QuickPID.h>
+
 #include <State.h>
 
 #define VOLTAGE_PIN 34
 
-const uint8_t motor_pins[] = {15, 2, 4};
-const uint8_t reverse_pins[] = {5, 18, 19};
-const uint8_t current_pins[] = {35, 33, 32};
-const uint8_t pwm_channels[] = {3, 1, 0};
+const uint8_t motor_pins[3] = {15, 2, 4};
+const uint8_t reverse_pins[3] = {5, 18, 19};
+const uint8_t current_pins[3] = {35, 33, 32};
+const uint8_t pwm_channels[3] = {3, 1, 0};
 
 #define MIDDLE_MOTOR_HALL_PIN1 13
 #define MIDDLE_MOTOR_HALL_PIN2 12
@@ -28,6 +30,9 @@ const uint8_t pwm_channels[] = {3, 1, 0};
 #define PWM_RESOLUTION 8
 const int MAX_DUTY_CYCLE = (int)(pow(2, PWM_RESOLUTION) - 1);
 
+const uint32_t sample_time_us = 1000000; // 100ms
+
+
 /*
 Output the Motor state to the correct pins and calculate the speed of the motor
 */
@@ -41,9 +46,10 @@ class Control {
         int last_left_hall_sensor = 0;
         int last_right_hall_sensor = 0;
 
-        int middle_motor_step = 0;
-        int left_motor_step = 0;
-        int right_motor_step = 0;
+        volatile int middle_motor_step = 0;
+        volatile int left_motor_step = 0;
+        volatile int right_motor_step = 0;
+        volatile bool compute_now = false;  //for counting interrupt
     private:
         float current = 0.0;
         float measure = 0.0;
@@ -51,8 +57,11 @@ class Control {
         std::array<unsigned long, 3> current_loop_times{micros(), micros(), micros()};
         std::array<unsigned long, 3> last_loop_times{micros(), micros(), micros()};
         
-        // float sensor_reading = 0.0;
+        volatile bool computeNow = false;
+        std::array<QuickPID, 3> cruise_controls{QuickPID(), QuickPID(), QuickPID()};
+
         uint8_t i = 0;
+        hw_timer_t * timer = NULL;
 };
 
 extern Control control;
@@ -66,5 +75,7 @@ void left_motor_hall_interrupt_3();
 void right_motor_hall_interrupt_1();
 void right_motor_hall_interrupt_2();
 void right_motor_hall_interrupt_3();
+
+void pid_interrupt();
 
 #endif
