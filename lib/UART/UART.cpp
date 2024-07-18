@@ -1,6 +1,5 @@
 #include "UART.h"
 
-
 UART::UART() {
     Serial.setRxBufferSize(BUFFER_SIZE);
     Serial.setTxBufferSize(BUFFER_SIZE);
@@ -96,13 +95,13 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
             }
         }
         if(doc.containsKey("Kp")) {
-            state->Kp = (bool)doc["Kp"];
+            state->Kp = (float)doc["Kp"];
         }
         if(doc.containsKey("Ki")) {
-            state->Ki = (bool)doc["Ki"];
+            state->Ki = (float)doc["Ki"];
         }
         if(doc.containsKey("Kd")) {
-            state->Kd = (bool)doc["Kd"];
+            state->Kd = (float)doc["Kd"];
         }
         if(doc.containsKey("e")) {
             state->enable = (bool)doc["e"];
@@ -126,6 +125,10 @@ void UART::send_state_as_json(State* state) {
     // doc["Im"] = state->motors[0].current;
     // doc["Il"] = state->motors[1].current;
     // doc["Ir"] = state->motors[2].current;
+
+    doc["Kp"] = state->Kp;
+    doc["Ki"] = state->Ki;
+    doc["Kd"] = state->Kd;
 
     doc["sm"] = state->motors[0].step;
     doc["sl"] = state->motors[1].step;

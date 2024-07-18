@@ -10,12 +10,27 @@ class Kite{ // TODO: should be struct
         float angle; //using axis-angle representation
 
         Quaternion orientation;
-        float wireLength = 50;
+        float wire_length = 50;
         float setpoint = 90; // wanted angle in degrees
-        void update();
+        void update_angle(){
+            Quaternion conjugate = this->orientation.getNormalized().getConjugate();
+            VectorFloat unitVector(0, 0, -1);
+            unitVector.rotate(&conjugate);
+
+            this->angle = -atan2f(unitVector.y, unitVector.x) * RAD_TO_DEG;;
+        }
+        void update_position(){
+            orientation = this->orientation;
+            VectorFloat wire(0, 0, 1);
+
+            // normalize the positional quaternion, so we can use it to multiply
+            orientation.normalize();
+            
+            wire.rotate(&orientation);
+
+            this->position = wire;
+        }
     private:
-        void updateAngle();
-        void updatePosition();
 };
 
 struct Motor{
@@ -25,6 +40,7 @@ struct Motor{
     float rotation = 0.0; // total rotation
     float speed = 0.0; // rotational velocity
     float set_speed = 0.0; // wanted speed
+    float avg_speed = 0.0;
     float current = 0.0;
     bool reverse = false;
 };
@@ -39,15 +55,14 @@ class State{
         unsigned long last_receive_time = micros();
         bool enable = false;
         bool mode = 1; // 0. percentage mode 1. speed mode
-        float Kp = 1.0;
+        float Kp = 0.05;
         float Ki = 0.0;
         float Kd = 0.0;
         
-        void update();
+        void update(){
+            kite.update_angle();
+            kite.update_position();
+        }
 };
-
-
-// Global state data structure
-extern State state;
 
 #endif

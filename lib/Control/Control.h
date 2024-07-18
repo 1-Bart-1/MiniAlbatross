@@ -30,7 +30,7 @@ const uint8_t pwm_channels[3] = {3, 1, 0};
 #define PWM_RESOLUTION 8
 const int MAX_DUTY_CYCLE = (int)(pow(2, PWM_RESOLUTION) - 1);
 
-const uint32_t sample_time_us = 1000000; // 100ms
+const uint32_t sample_time_us = 100000; // 10ms
 
 
 /*
@@ -58,6 +58,7 @@ class Control {
         std::array<unsigned long, 3> last_loop_times{micros(), micros(), micros()};
         
         volatile bool computeNow = false;
+        unsigned long last_compute = micros();
         std::array<QuickPID, 3> cruise_controls{QuickPID(), QuickPID(), QuickPID()};
 
         uint8_t i = 0;

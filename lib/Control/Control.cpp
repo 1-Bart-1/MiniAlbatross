@@ -53,17 +53,21 @@ void Control::update(State* state){
     if (i<2) i++;
     else i=0;
 
-    if (state->mode == 1 && compute_now == true) {
+    if (compute_now == true) {
         compute_now = false;
-        // Serial.println(millis());
-        // need to keep track of time to calc good speed
-
-        state->motors[0].speed = (float)(middle_motor_step - state->motors[0].step) / 48.0 / ((float)sample_time_us / 1000000.0); // speed in rev/second
-        state->motors[1].speed = (float)(left_motor_step - state->motors[1].step) / 48.0 / ((float)sample_time_us / 1000000.0); // speed in rev/second
-        state->motors[2].speed = (float)(right_motor_step - state->motors[2].step) / 48.0 / ((float)sample_time_us / 1000000.0); // speed in rev/second
-        for(uint8_t j=0; j<=2; j++){
-            cruise_controls[j].SetTunings(state->Kp, state->Ki, state->Kd);
-            cruise_controls[j].Compute();
+        float delta_time = (float)(micros() - last_compute) / 1000000.0;
+        last_compute = micros();
+        state->motors[0].speed = (float)(middle_motor_step - state->motors[0].step) / 48.0 / delta_time; // speed in rev/second
+        state->motors[1].speed = (float)(left_motor_step - state->motors[1].step) / 48.0 / delta_time; // speed in rev/second
+        state->motors[2].speed = (float)(right_motor_step - state->motors[2].step) / 48.0 / delta_time; // speed in rev/second
+        if (state->mode == 1) {
+            for(uint8_t j=0; j<=2; j++){
+                state->motors[j].avg_speed = state->motors[j].avg_speed * 0.9 + state->motors[j].speed*0.1;
+                if (cruise_controls[j].GetKp() != state->Kp || cruise_controls[j].GetKi() != state->Ki || cruise_controls[j].GetKd() != state->Kd) {
+                    cruise_controls[j].SetTunings(state->Kp, state->Ki, state->Kd);
+                }
+                cruise_controls[j].Compute();
+            }
         }
         state->motors[0].step = middle_motor_step;
         state->motors[1].step = left_motor_step;
@@ -73,7 +77,13 @@ void Control::update(State* state){
     // state->voltage = analogRead(VOLTAGE_PIN);
     measure = analogRead(current_pins[i]);
     if (state->enable) {
-        ledcWrite(pwm_channels[i], (int)(abs(state->motors[i].percentage)*MAX_DUTY_CYCLE));
+        // write 0 if mode==1, -0.05 < set_speed < 0.05 and speed == 0.0
+        // write 0 if mode==0 and -0.05 < percentage < 0.05
+        if (-0.05 < state->motors[i].percentage && state->motors[i].percentage < 0.05 && state->motors[i].speed == 0.0) {
+            ledcWrite(pwm_channels[i], 0);
+        } else {
+            ledcWrite(pwm_channels[i], (int)((abs(state->motors[i].percentage)*0.55+0.45)*MAX_DUTY_CYCLE));
+        }
         if (state->motors[i].percentage < 0.0) digitalWrite(reverse_pins[i], HIGH);
         else digitalWrite(reverse_pins[i], LOW);
     } else {
