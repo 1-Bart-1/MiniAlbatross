@@ -6,45 +6,29 @@ UART::UART() {
     Serial.begin(115200);
 }
 
-void UART::begin(void) {
-}
-
-void UART::update(State* state) {
-    // uart.send_debug_info_msg(state);
-    // send_state_as_json(state);
-
-    this->listen();
-    if (this->new_package_received) {
-        // Serial.println(this->received_string);
-        this->enumerate_commands_from_json(this->received_string, state);
-        this->new_package_received = false;
-        this->send_state_as_json(state);
-        state->last_receive_time = micros();
-    }
-}
-
-void UART::listen(void) {
+bool UART::receive(State* state) {
     /* Listen on UART for a null terminated string */
 
     static uint8_t index = 0;
     char end_marker = '\n';
     char rc;
-    if (Serial.available() > 0) {
-        while ((Serial.available() > 0) && (this->new_package_received == false)) {
-            rc = Serial.read();
+    while (Serial.available() > 0) {
+        rc = Serial.read();
 
-            if (rc != end_marker) {
-                this->received_string[index] = rc;
-                index++;
-            }
-            else {
-                this->received_string[index] = '\0';
-                index = 0;
-                this->new_package_received = true;
-                // Serial.flush();
-            }
+        if (rc != end_marker) {
+            this->received_string[index] = rc;
+            index++;
+        }
+        else {
+            this->received_string[index] = '\0';
+            index = 0;
+            state->last_receive_time = micros();
+            this->enumerate_commands_from_json(this->received_string, state);
+            return true;
+            // Serial.flush();
         }
     }
+    return false;
 }
 
 void UART::enumerate_commands_from_json(char* string, State* state) {
@@ -113,39 +97,51 @@ void UART::send_state_as_json(State* state) {
     /* For testing */
 
     StaticJsonDocument<BUFFER_SIZE> doc;
+
     // doc["e"] = state->enable;
     doc["m"] = state->motors[0].percentage;
-    doc["l"] = state->motors[1].percentage;
-    doc["r"] = state->motors[2].percentage;
+    // doc["l"] = state->motors[1].percentage;
+    // doc["r"] = state->motors[2].percentage;
 
-    // doc["sm"] = state->motors[0].step;
-    // doc["sl"] = state->motors[1].step;
-    // doc["sr"] = state->motors[2].step;
-
-    // doc["Im"] = state->motors[0].current;
+    doc["Im"] = state->motors[0].current;
     // doc["Il"] = state->motors[1].current;
     // doc["Ir"] = state->motors[2].current;
 
-    doc["Kp"] = state->Kp;
-    doc["Ki"] = state->Ki;
-    doc["Kd"] = state->Kd;
+    // doc["Kp"] = state->Kp;
+    // doc["Ki"] = state->Ki;
+    // doc["Kd"] = state->Kd;
 
     doc["sm"] = state->motors[0].step;
     doc["sl"] = state->motors[1].step;
     doc["sr"] = state->motors[2].step;
 
-    doc["vm"] = state->motors[0].speed;
-    doc["vl"] = state->motors[1].speed;
-    doc["vr"] = state->motors[2].speed;
+    // doc["vm"] = state->motors[0].filtered_speed;
+    // doc["vl"] = state->motors[1].speed;
+    // doc["vr"] = state->motors[2].speed;
 
-    doc["vsm"] = state->motors[0].set_speed;
-    doc["vsl"] = state->motors[1].set_speed;
-    doc["vsr"] = state->motors[2].set_speed;
+    // doc["am"] = state->motors[0].filtered_acc;
+
+    doc["fm"] = state->motors[0].force;
+    doc["fl"] = state->motors[1].force;
+    doc["fr"] = state->motors[2].force;
+
+    // doc["vsm"] = state->motors[0].set_speed;
+    // doc["vsl"] = state->motors[1].set_speed;
+    // doc["vsr"] = state->motors[2].set_speed;
+
+    doc["qkw"] = state->kite.q_kite.w;
+    doc["qkx"] = state->kite.q_kite.x;
+    doc["qky"] = state->kite.q_kite.y;
+    doc["qkz"] = state->kite.q_kite.z;
+    doc["qtw"] = state->kite.q_tether.w;
+    doc["qtx"] = state->kite.q_tether.x;
+    doc["qty"] = state->kite.q_tether.y;
+    doc["qtz"] = state->kite.q_tether.z;
 
     // doc["om"] = 
 
     // doc["V"] = state->voltage;
-    // doc["t"] = millis() - state->start_time;
+    doc["t"] = (float)micros()/1000000.0; // send time in seconds
 
     // send the prepared json string over Serial uart
     serializeJson(doc, Serial);
@@ -154,7 +150,7 @@ void UART::send_state_as_json(State* state) {
 
 void UART::send_debug_info_msg(State* state) {
     Serial.print("motor\t");
-    Serial.print(state->motors[0].speed);
+    Serial.print(state->motors[0].filtered_speed);
     Serial.print("\t");
     Serial.print(state->motors[0].percentage);
     Serial.print("\t");

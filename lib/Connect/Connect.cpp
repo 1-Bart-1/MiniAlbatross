@@ -13,8 +13,6 @@ void Connect::begin(State* state){
 	Serial.print("STA MAC: "); Serial.println(WiFi.macAddress());
 	// Init ESPNow with a fallback logic
 	initESPNow();
-	// Once ESPNow is successfully Init, we will register for Send CB to
-	// get the status of Trasnmitted packet
 	esp_now_register_recv_cb(OnDataRecv);
 
 	// add a broadcast peer
@@ -129,11 +127,19 @@ void Connect::initBroadcastSlave() {
 	manageSlave();
 }
 
+void Connect::sendPing() {
+	const uint8_t *peer_addr = slave.peer_addr;
+	uint8_t one = 1;
+    esp_err_t result = esp_now_send(peer_addr, &one, 1);
+}
 
 Connect connect;
 
 
 // callback when data is recv from Master
-void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-	memcpy(&connect.state->kite.orientation, data, sizeof(connect.state->kite.orientation));
+void IRAM_ATTR OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
+	if (sizeof(data) == sizeof(connect.state->kite.q_kite)) {
+		memcpy(&connect.state->kite.q_kite, data, sizeof(connect.state->kite.q_kite));
+	}
+	connect.received = true;
 }

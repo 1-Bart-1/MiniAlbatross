@@ -53,10 +53,10 @@ class Orient {
                     // are all updated.
                     // Quaternion values are, by default, stored in Q30 long
                     // format. calcQuat turns them into a float between -1 and 1
-                    state->kite.orientation.w = imu.calcQuat(imu.qw);
-                    state->kite.orientation.x = imu.calcQuat(imu.qx);
-                    state->kite.orientation.y = imu.calcQuat(imu.qy);
-                    state->kite.orientation.z = imu.calcQuat(imu.qz);
+                    state->kite.q_tether.w = imu.calcQuat(imu.qw);
+                    state->kite.q_tether.x = imu.calcQuat(imu.qx);
+                    state->kite.q_tether.y = imu.calcQuat(imu.qy);
+                    state->kite.q_tether.z = imu.calcQuat(imu.qz);
                 }
             }
         }
