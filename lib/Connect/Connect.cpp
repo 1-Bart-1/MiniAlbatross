@@ -138,8 +138,6 @@ Connect connect;
 
 // callback when data is recv from Master
 void IRAM_ATTR OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-	if (sizeof(data) == sizeof(connect.state->kite.q_kite)) {
-		memcpy(&connect.state->kite.q_kite, data, sizeof(connect.state->kite.q_kite));
-	}
+	memcpy(&connect.state->kite.q_kite, data, sizeof(connect.state->kite.q_kite));
 	connect.received = true;
 }

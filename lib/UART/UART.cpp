@@ -49,48 +49,44 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
     DeserializationError error = deserializeJson(doc, string);
 
     if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.f_str());
         return;
     } 
-    else {
-        if(doc.containsKey("md")) {
-            state->mode = (bool)doc["md"];
-        }
-        if(doc.containsKey("m")) {
-            if(state->mode == 0) {
-                state->motors[0].percentage = (float)doc["m"];
-            } else {
-                state->motors[0].set_speed = (float)doc["m"];
-            }
-        }
-        if(doc.containsKey("l")) {
-            if(state->mode == 0) {
-                state->motors[1].percentage = (float)doc["l"];
-            } else {
-                state->motors[1].set_speed = (float)doc["l"];
-            }
-        }
-        if(doc.containsKey("r")) {
-            if(state->mode == 0) {
-                state->motors[2].percentage = (float)doc["r"];
-            } else {
-                state->motors[2].set_speed = (float)doc["r"];
-            }
-        }
-        if(doc.containsKey("Kp")) {
-            state->Kp = (float)doc["Kp"];
-        }
-        if(doc.containsKey("Ki")) {
-            state->Ki = (float)doc["Ki"];
-        }
-        if(doc.containsKey("Kd")) {
-            state->Kd = (float)doc["Kd"];
-        }
-        if(doc.containsKey("e")) {
-            state->enable = (bool)doc["e"];
-        } 
+    if(doc.containsKey("md")) {
+        state->mode = (bool)doc["md"];
     }
+    if(doc.containsKey("m")) {
+        if(state->mode == 0) {
+            state->motors[0].percentage = (float)doc["m"];
+        } else {
+            state->motors[0].set_speed = (float)doc["m"];
+        }
+    }
+    if(doc.containsKey("l")) {
+        if(state->mode == 0) {
+            state->motors[1].percentage = (float)doc["l"];
+        } else {
+            state->motors[1].set_speed = (float)doc["l"];
+        }
+    }
+    if(doc.containsKey("r")) {
+        if(state->mode == 0) {
+            state->motors[2].percentage = (float)doc["r"];
+        } else {
+            state->motors[2].set_speed = (float)doc["r"];
+        }
+    }
+    if(doc.containsKey("Kp")) {
+        state->Kp = (float)doc["Kp"];
+    }
+    if(doc.containsKey("Ki")) {
+        state->Ki = (float)doc["Ki"];
+    }
+    if(doc.containsKey("Kd")) {
+        state->Kd = (float)doc["Kd"];
+    }
+    if(doc.containsKey("e")) {
+        state->enable = (bool)doc["e"];
+    } 
 }
 
 void UART::send_state_as_json(State* state) {
@@ -103,7 +99,7 @@ void UART::send_state_as_json(State* state) {
     // doc["l"] = state->motors[1].percentage;
     // doc["r"] = state->motors[2].percentage;
 
-    doc["Im"] = state->motors[0].current;
+    // doc["Im"] = state->motors[0].current;
     // doc["Il"] = state->motors[1].current;
     // doc["Ir"] = state->motors[2].current;
 
@@ -111,13 +107,13 @@ void UART::send_state_as_json(State* state) {
     // doc["Ki"] = state->Ki;
     // doc["Kd"] = state->Kd;
 
-    doc["sm"] = state->motors[0].step;
-    doc["sl"] = state->motors[1].step;
-    doc["sr"] = state->motors[2].step;
+    // doc["sm"] = state->motors[0].step;
+    // doc["sl"] = state->motors[1].step;
+    // doc["sr"] = state->motors[2].step;
 
-    // doc["vm"] = state->motors[0].filtered_speed;
-    // doc["vl"] = state->motors[1].speed;
-    // doc["vr"] = state->motors[2].speed;
+    doc["vm"] = state->motors[0].filtered_speed;
+    doc["vl"] = state->motors[1].filtered_speed;
+    doc["vr"] = state->motors[2].filtered_speed;
 
     // doc["am"] = state->motors[0].filtered_acc;
 
@@ -133,10 +129,10 @@ void UART::send_state_as_json(State* state) {
     doc["qkx"] = state->kite.q_kite.x;
     doc["qky"] = state->kite.q_kite.y;
     doc["qkz"] = state->kite.q_kite.z;
-    doc["qtw"] = state->kite.q_tether.w;
-    doc["qtx"] = state->kite.q_tether.x;
-    doc["qty"] = state->kite.q_tether.y;
-    doc["qtz"] = state->kite.q_tether.z;
+    // doc["qtw"] = state->kite.q_tether.w;
+    // doc["qtx"] = state->kite.q_tether.x;
+    // doc["qty"] = state->kite.q_tether.y;
+    // doc["qtz"] = state->kite.q_tether.z;
 
     // doc["om"] = 
 
