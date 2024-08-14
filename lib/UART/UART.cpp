@@ -75,15 +75,6 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
             state->motors[2].set_speed = (float)doc["r"];
         }
     }
-    if(doc.containsKey("Kp")) {
-        state->Kp = (float)doc["Kp"];
-    }
-    if(doc.containsKey("Ki")) {
-        state->Ki = (float)doc["Ki"];
-    }
-    if(doc.containsKey("Kd")) {
-        state->Kd = (float)doc["Kd"];
-    }
     if(doc.containsKey("e")) {
         state->enable = (bool)doc["e"];
     } 
@@ -111,11 +102,11 @@ void UART::send_state_as_json(State* state) {
     // doc["sl"] = state->motors[1].step;
     // doc["sr"] = state->motors[2].step;
 
-    doc["vm"] = state->motors[0].filtered_speed;
-    doc["vl"] = state->motors[1].filtered_speed;
-    doc["vr"] = state->motors[2].filtered_speed;
+    doc["vm"] = state->motors[0].speed;
+    doc["vl"] = state->motors[1].speed;
+    doc["vr"] = state->motors[2].speed;
 
-    // doc["am"] = state->motors[0].filtered_acc;
+    // doc["am"] = state->motors[0].acc;
 
     doc["fm"] = state->motors[0].force;
     doc["fl"] = state->motors[1].force;
@@ -146,7 +137,7 @@ void UART::send_state_as_json(State* state) {
 
 void UART::send_debug_info_msg(State* state) {
     Serial.print("motor\t");
-    Serial.print(state->motors[0].filtered_speed);
+    Serial.print(state->motors[0].speed);
     Serial.print("\t");
     Serial.print(state->motors[0].percentage);
     Serial.print("\t");
