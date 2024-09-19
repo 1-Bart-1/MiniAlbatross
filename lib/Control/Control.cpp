@@ -1,17 +1,25 @@
 #include <Control.h>
 
+const char DualshockMacAddress[] = "D8:13:2A:7F:8D:36";
+
 Control::Control() {
 }
 
 void Control::begin(State* state) {
-    Serial2.begin(115200);
-    while (!Serial2) {;}
-    vesc.setSerialPort(&Serial2);
-    while(!vesc.getFWversion()){
-        Serial.println("Failed to connect to VESC");    
-        delay(1000);
+    if (state->enableMotor) {
+        Serial2.begin(115200);
+        while (!Serial2) {;}
+        vesc.setSerialPort(&Serial2);
+        while(!vesc.getFWversion()){
+            Serial.println("Failed to connect to VESC");    
+            delay(1000);
+        }
+        Serial.println("Motor Initialized");
     }
-    Serial.println("Motor Initialized");
+
+    if(state->controller_support){
+        PS4.begin(DualshockMacAddress);
+    }
 }
 
 
@@ -19,7 +27,7 @@ void Control::update(State* state){
     Serial.print("Updating control: ");
 
     for (int i=0; i<3; i++) {
-        if (state->enable) {
+        if (state->enableMotor) {
             if (state->mode) { // If speed mode (0)
                 Serial.print("Speed mode, ");
                 vesc.setRPM(state->motors[i].set_speed*16*60, can_id[i]);
@@ -37,6 +45,20 @@ void Control::update(State* state){
             vesc.setCurrent(0.0, can_id[i]);
         }
     }
+}
+
+void Control::controllerInput(State* state) {
+    if (PS4.isConnected()) {
+    
+      if (PS4.Cross()) state->motors[0].set_speed = 1.0;
+      else (state->motors[0].set_speed = 0.0);
+      if (PS4.L1()) state->motors[1].set_speed = 1.0;
+      else (state->motors[1].set_speed = 0.0);
+      if (PS4.R1()) state->motors[2].set_speed = 1.0;
+      else (state->motors[2].set_speed = 0.0);
+
+  }
+  
 }
 
 Control control;

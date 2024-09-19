@@ -53,11 +53,12 @@ class State{
         float voltage = 0.0;
         unsigned long start_time = millis();
         unsigned long last_receive_time = micros();
-        bool enable = false;
+        bool enableMotor = false;
         bool mode = 1; // 0. current mode 1. speed mode
         float Kp = 0.05;
         float Ki = 0.5;
         float Kd = 0.0;
+        bool controller_support = false; // Support for PS4 controller
         
         void update(){
             kite.update_angle();

@@ -76,7 +76,7 @@ void UART::enumerate_commands_from_json(char* string, State* state) {
         }
     }
     if(doc.containsKey("e")) {
-        state->enable = (bool)doc["e"];
+        state->enableMotor = (bool)doc["e"];
     } 
 }
 

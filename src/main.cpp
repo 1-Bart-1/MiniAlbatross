@@ -19,26 +19,29 @@ void setup() {
     //connect.begin(&state);
     Serial.begin(9600);
     Serial.println("Startup...");
-    state.enable = true;
+    state.enableMotor = true;
     state.mode = 1; // 0 for current, 1 for speed
+    state.controller_support = true;
     control.begin(&state);
+    Serial.println("Startup done");
     
 }
 
 
 void loop() {
+    control.controllerInput(&state);
+    control.update(&state);
     //orient.update(&state);
     //state.update();
-    for(int i = 0; i < 3; i++) {
+    /*for(int i = 0; i < 3; i++) {
         state.motors[i].set_speed = 2;
          control.update(&state);
     }
+
+    */
     
     //Serial.println(state.motors[0].set_speed);
-    for(int i = 0; i < 3; i++) {
-        state.motors[i].set_speed = 0;
-        control.update(&state);
-    }
+    
    
     //Serial.println(state.motors[0].set_speed);
     //Serial.print(vesc.getFWversion(0))
