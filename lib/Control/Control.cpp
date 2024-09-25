@@ -19,7 +19,22 @@ void Control::begin(State* state) {
 
     if(state->controller_support){
         PS4.begin(DualshockMacAddress);
+        Serial.println("Connecting to controller...");
+        while(true){
+            if(PS4.isConnected()){
+                Serial.println("Controller connected, press options to start");
+                break;
+            }
+        }
+        while(true){
+            if(PS4.isConnected() && PS4.Options()){
+                break;
+            }
+        }
+        Serial.println("Controller Initialized");
+        
     }
+
 }
 
 
@@ -48,14 +63,26 @@ void Control::update(State* state){
 }
 
 void Control::controllerInput(State* state) {
-    if (PS4.isConnected()) {
+    if (state->controller_support && PS4.isConnected()) {
     
-      if (PS4.Cross()) state->motors[0].set_speed = 1.0;
-      else (state->motors[0].set_speed = 0.0);
-      if (PS4.L1()) state->motors[1].set_speed = 1.0;
-      else (state->motors[1].set_speed = 0.0);
-      if (PS4.R1()) state->motors[2].set_speed = 1.0;
-      else (state->motors[2].set_speed = 0.0);
+        if (PS4.Cross()){
+            state->motors[0].set_speed = 1.0;
+            Serial.println("Cross");
+        }
+        else (state->motors[0].set_speed = 0.0);
+
+        if (PS4.L1()){
+            state->motors[1].set_speed = 1.0;
+            Serial.println("L1");
+        }
+        else (state->motors[1].set_speed = 0.0);
+
+        if (PS4.R1()){
+            state->motors[2].set_speed = 1.0;
+            Serial.println("R1");
+        }
+        else (state->motors[2].set_speed = 0.0);
+   
 
   }
   

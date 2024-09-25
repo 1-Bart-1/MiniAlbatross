@@ -20,8 +20,8 @@ class Control {
     private:
         float current = 0.0;
         float measure = 0.0;
-        uint8_t can_id[3] = {26,52,0};
-        VescUart vesc; // left right middle
+        uint8_t can_id[3] = {26,68,0}; // left, right, middle
+        VescUart vesc; 
 
 };
 
