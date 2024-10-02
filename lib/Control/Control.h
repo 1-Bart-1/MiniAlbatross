@@ -20,8 +20,13 @@ class Control {
     private:
         float current = 0.0;
         float measure = 0.0;
-        uint8_t can_id[3] = {26,68,0}; // left, right, middle
+        uint8_t can_id[3] = {0,26,68}; //  middle, left, right
         VescUart vesc; 
+        int8_t LStickY = 0;
+        int8_t RStickY = 0;
+        int8_t RStickX = 0;
+        bool isSteering = false;
+
 
 };
 

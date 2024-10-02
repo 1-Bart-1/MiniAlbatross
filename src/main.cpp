@@ -31,20 +31,12 @@ void setup() {
 void loop() {
     control.controllerInput(&state);
     control.update(&state);
+
+
     //orient.update(&state);
     //state.update();
-    /*for(int i = 0; i < 3; i++) {
-        state.motors[i].set_speed = 2;
-         control.update(&state);
-    }
 
-    */
     
-    //Serial.println(state.motors[0].set_speed);
-    
-   
-    //Serial.println(state.motors[0].set_speed);
-    //Serial.print(vesc.getFWversion(0))
     /*if (connect.received) {
         connect.received = false;
         // uart.send_state_as_json(&state); // when we get the updated quaternion from the kite, we send state info over serial

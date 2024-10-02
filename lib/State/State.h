@@ -34,8 +34,14 @@ class Kite{ // TODO: should be struct
 class Motor{
     public:
         float percentage = 0.0; // percentage of the max input voltage
+
         int step = 0; // number of coil steps. TODO: how many steps is one rotation? and what is the diameter?
         int last_step = 0;
+        int middle_step = 0; // Always has to know step of middle motor
+        int offset = 0;
+        int reference_offset = 0; // offset from reference step
+
+        
         float acc = 0.0;
         float speed = 0.0;
         float set_speed = 0.0; // wanted speed in rps or ampere
