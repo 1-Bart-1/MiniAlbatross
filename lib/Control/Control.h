@@ -17,6 +17,9 @@ class Control {
         void begin(State* state);
         void update(State* state);
         void controllerInput(State* state);
+        void moveFromReference(State* state, int motor, int steps);
+
+        
     private:
         float current = 0.0;
         float measure = 0.0;
@@ -25,8 +28,20 @@ class Control {
         int8_t LStickY = 0;
         int8_t RStickY = 0;
         int8_t RStickX = 0;
+        const float RStickTuner = 0.5;
         bool isSteering = false;
 
+        float K = 0.01;
+        float u_p = 0.0;
+        float Ti = 10.0;
+        float u_i = 0.0;
+        float Kd = 0.0;
+
+        unsigned long last_update_time = micros();
+        const float sampling_time = 0.1; // in seconds
+
+        float alpha = 0.0;
+        
 
 };
 

@@ -40,6 +40,8 @@ class Motor{
         int middle_step = 0; // Always has to know step of middle motor
         int offset = 0;
         int reference_offset = 0; // offset from reference step
+        bool isSaturated = false;
+
 
         
         float acc = 0.0;
@@ -61,8 +63,8 @@ class State{
         unsigned long last_receive_time = micros();
         bool enableMotor = false;
         bool mode = 1; // 0. current mode 1. speed mode
-        float Kp = 0.05;
-        float Ki = 0.5;
+        float Kp = 0.01;
+        float Ti = 1;
         float Kd = 0.0;
         bool controller_support = false; // Support for PS4 controller
         

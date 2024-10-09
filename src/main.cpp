@@ -5,7 +5,7 @@
 //#include "Connect.h"
 #include "Control.h"
 #include "State.h"
-#include "UART.h"
+//#include "UART.h"
 
 
 
@@ -29,8 +29,8 @@ void setup() {
 
 
 void loop() {
-    control.controllerInput(&state);
     control.update(&state);
+    
 
 
     //orient.update(&state);
